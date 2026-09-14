@@ -1,3 +1,17 @@
+.task {
+    background: white;
+    padding: 15px;
+    margin: 10px auto;
+    max-width: 400px;
+    border-radius: 10px;
+    text-align: left;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.task input {
+    margin-right: 10px;
+    transform: scale(1.2);
+}
 body {
     font-family: Arial, sans-serif;
     background: #f4f7fb;
