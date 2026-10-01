@@ -1,41 +1,183 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Study Planner</title>
-    <link rel="Stylesheet" href="Style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Study Planner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      margin: 0;
+      padding: 30px 15px;
+    }
+    .container {
+      max-width: 550px;
+      margin: auto;
+      text-align: center;
+    }
+    h1 { color: #2563eb; }
+    .task {
+      background: white;
+      padding: 15px;
+      margin: 12px 0;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px #00000012;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+    }
+    .task span {
+      flex: 1;
+      overflow-wrap: anywhere;
+    }
+    .task.completed span {
+      text-decoration: line-through;
+      color: #64748b;
+    }
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+    }
+    .delete { background: #dc2626; }
+    form {
+      display: flex;
+      gap: 8px;
+      margin: 20px 0;
+    }
+    input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    input[type="checkbox"] {
+      width: 19px;
+      height: 19px;
+      cursor: pointer;
+    }
+    .goal {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 25px;
+    }
+    #progress { color: #2563eb; font-weight: bold; }
+  </style>
 </head>
 <body>
-
-  <body>
-
+  <div class="container">
     <h1>📚 My Study Planner</h1>
-
     <h2>Today's Study Plan</h2>
 
-    <div class="task">
-        <input type="checkbox">
-        <label>AIML - 1 hour</label>
+    <form id="taskForm">
+      <input type="text" id="taskInput"
+        placeholder="Enter a new task..." required>
+      <button type="submit">Add</button>
+    </form>
+
+    <div id="taskList"></div>
+
+    <div class="goal">
+      <h2>🎯 My Goal</h2>
+      <p>Study consistently and complete my daily targets.</p>
+      <p id="progress">0 of 0 tasks completed</p>
     </div>
+  </div>
 
-    <div class="task">
-        <input type="checkbox">
-        <label>Operating System - 1 hour</label>
-    </div>
+  <script>
+    const defaultTasks = [
+      { id: 1, text: "AIML - 1 hour", done: false },
+      { id: 2, text: "Operating System - 1 hour", done: false },
+      { id: 3, text: "C Programming - 1 hour", done: false },
+      { id: 4, text: "Revision - 30 minutes", done: false }
+    ];
 
-    <div class="task">
-        <input type="checkbox">
-        <label>C Programming - 1 hour</label>
-    </div>
+    let tasks;
+    try {
+      tasks = JSON.parse(localStorage.getItem("studyTasks"));
+      if (!Array.isArray(tasks)) tasks = defaultTasks;
+    } catch {
+      tasks = defaultTasks;
+    }
 
-    <div class="task">
-        <input type="checkbox">
-        <label>Revision - 30 minutes</label>
-    </div>
+    const taskList = document.getElementById("taskList");
+    const taskForm = document.getElementById("taskForm");
+    const taskInput = document.getElementById("taskInput");
+    const progress = document.getElementById("progress");
 
-    <h2>🎯 My Goal</h2>
-    <p>Study consistently and complete my daily targets.</p>
+    function saveTasks() {
+      localStorage.setItem("studyTasks", JSON.stringify(tasks));
+    }
 
-</body>
+    function renderTasks() {
+      taskList.innerHTML = "";
+      let completed = 0;
 
+      tasks.forEach(task => {
+        if (task.done) completed++;
+
+        const row = document.createElement("div");
+        row.className = "task" + (task.done ? " completed" : "");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.done;
+        checkbox.setAttribute("aria-label", "Mark task completed");
+
+        const label = document.createElement("span");
+        label.textContent = task.text;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "delete";
+
+        checkbox.addEventListener("change", () => {
+          task.done = checkbox.checked;
+          saveTasks();
+          renderTasks();
+        });
+
+        deleteBtn.addEventListener("click", () => {
+          tasks = tasks.filter(item => item.id !== task.id);
+          saveTasks();
+          renderTasks();
+        });
+
+        row.append(checkbox, label, deleteBtn);
+        taskList.appendChild(row);
+      });
+
+      progress.textContent =
+        `${completed} of ${tasks.length} tasks completed`;
+    }
+
+    taskForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const text = taskInput.value.trim();
+      if (!text) return;
+
+      tasks.push({
+        id: Date.now(),
+        text: text,
+        done: false
+      });
+
+      saveTasks();
+      renderTasks();
+      taskInput.value = "";
+    });
+
+    renderTasks();
+  </script>
 </body>
 </html>
